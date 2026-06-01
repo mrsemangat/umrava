@@ -2,16 +2,21 @@
 import { useState } from 'react'
 import { SPOT_FOTO } from '@/data/spotFoto'
 import { cn } from '@/lib/utils'
-import { MapPin, Clock, Star, ChevronRight, X } from 'lucide-react'
+import { MapPin, Clock, Star, ChevronRight, X, Lock, Crown } from 'lucide-react'
 import type { SpotFoto } from '@/data/spotFoto'
+import { usePlan } from '@/components/dashboard/PlanProvider'
+import { UpgradeModal } from '@/components/dashboard/UpgradeModal'
 
 const KOTA_FILTER = ['semua', 'makkah', 'madinah']
 const WAKTU_FILTER = ['semua', 'pagi', 'siang', 'malam']
+const FREE_SPOT_LIMIT = 5
 
 export default function SpotFotoPage() {
   const [kotaFilter, setKotaFilter] = useState('semua')
   const [waktuFilter, setWaktuFilter] = useState('semua')
   const [selectedSpot, setSelectedSpot] = useState<SpotFoto | null>(null)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const { isPremium } = usePlan()
 
   const filtered = SPOT_FOTO.filter(s => {
     const kotaOk = kotaFilter === 'semua' || s.kota === kotaFilter
@@ -58,9 +63,40 @@ export default function SpotFotoPage() {
         </div>
       </div>
 
+      {/* Free limit notice */}
+      {!isPremium && (
+        <div className="flex items-center justify-between bg-[#F5E6C8] border border-[rgba(201,168,76,0.3)] rounded-2xl px-5 py-3 mb-4">
+          <div className="text-sm text-[#8B6914]">
+            <strong>Free:</strong> menampilkan {FREE_SPOT_LIMIT} dari {SPOT_FOTO.length} spot foto
+          </div>
+          <button onClick={() => setShowUpgrade(true)}
+            className="flex items-center gap-1.5 bg-[#C9A84C] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#b8963d] transition-colors">
+            <Crown size={11} /> Buka semua
+          </button>
+        </div>
+      )}
+
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map(spot => (
+        {filtered.map((spot, index) => {
+          const isLocked = !isPremium && index >= FREE_SPOT_LIMIT
+          return isLocked ? (
+            <div key={spot.id} onClick={() => setShowUpgrade(true)}
+              className="relative bg-white rounded-2xl border border-[rgba(201,168,76,0.12)] shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all group">
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-[#C9A84C] flex items-center justify-center shadow-md">
+                  <Lock size={16} className="text-white" />
+                </div>
+                <span className="text-xs font-bold text-[#8B6914]">Premium</span>
+              </div>
+              <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center opacity-30">
+                <span className="text-5xl">{spot.emoji}</span>
+              </div>
+              <div className="p-4 opacity-30">
+                <h3 className="font-bold text-[#0D4A28] mb-2 text-sm">{spot.nama}</h3>
+              </div>
+            </div>
+          ) : (
           <div
             key={spot.id}
             onClick={() => setSelectedSpot(spot)}
@@ -107,8 +143,11 @@ export default function SpotFotoPage() {
               </div>
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
+
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
 
       {/* Detail Modal */}
       {selectedSpot && (

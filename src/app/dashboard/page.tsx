@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-
-export const dynamic = 'force-dynamic'
 import { Card } from '@/components/ui/Card'
 import { getDaysUntil } from '@/lib/utils'
+import { UpgradeBanner } from '@/components/dashboard/UpgradeBanner'
+
+export const dynamic = 'force-dynamic'
 
 const TIPS_HARIAN = [
   "Perbanyak istighfar setiap hari sebagai persiapan rohani menuju Tanah Suci.",
@@ -47,9 +48,13 @@ export default async function DashboardPage() {
 
   const name = profile?.full_name ?? user.email?.split('@')[0] ?? 'Jamaah'
   const firstName = name.split(' ')[0]
+  const isPremium = profile?.plan === 'premium'
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Upgrade Banner — hanya untuk free user */}
+      {!isPremium && <UpgradeBanner />}
+
       {/* Greeting */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">

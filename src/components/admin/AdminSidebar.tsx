@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 const NAV = [
   { href: '/admin', icon: '📊', label: 'Overview' },
   { href: '/admin/users', icon: '👥', label: 'Manajemen User' },
+  { href: '/admin/paket', icon: '👑', label: 'Manajemen Paket' },
   { href: '/admin/content', icon: '📝', label: 'Manajemen Konten' },
   { href: '/admin/analytics', icon: '📈', label: 'Analytics' },
 ]

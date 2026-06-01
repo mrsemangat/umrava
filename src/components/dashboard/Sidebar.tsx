@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
-import { Menu, X, ChevronRight } from 'lucide-react'
+import { Menu, X, ChevronRight, Crown } from 'lucide-react'
+import { UpgradeModal } from './UpgradeModal'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: '🏠', label: 'Beranda' },
@@ -19,11 +20,13 @@ interface SidebarProps {
   userName?: string
   departureDate?: string
   prepProgress?: number
+  isPremium?: boolean
 }
 
-export function Sidebar({ userName = 'Jamaah', departureDate, prepProgress = 0 }: SidebarProps) {
+export function Sidebar({ userName = 'Jamaah', departureDate, prepProgress = 0, isPremium = false }: SidebarProps) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   const daysLeft = departureDate
     ? Math.max(0, Math.ceil((new Date(departureDate).getTime() - Date.now()) / 86400000))
@@ -88,6 +91,27 @@ export function Sidebar({ userName = 'Jamaah', departureDate, prepProgress = 0 }
         )}
       </div>
 
+      {/* Upgrade CTA untuk free user */}
+      {!isPremium && (
+        <div className="mx-4 mb-3">
+          <button
+            onClick={() => { setShowUpgrade(true); setMobileOpen(false) }}
+            className="w-full flex items-center justify-center gap-2 bg-[#C9A84C] hover:bg-[#b8963d] text-white py-2.5 rounded-xl text-sm font-bold transition-all"
+          >
+            <Crown size={14} /> Upgrade Premium
+          </button>
+          <p className="text-center text-[10px] text-[rgba(251,247,240,0.4)] mt-1.5">Rp49.000 sekali bayar</p>
+        </div>
+      )}
+
+      {/* Plan badge */}
+      {isPremium && (
+        <div className="mx-4 mb-3 flex items-center justify-center gap-2 bg-[rgba(201,168,76,0.15)] border border-[rgba(201,168,76,0.3)] py-2 rounded-xl">
+          <Crown size={13} className="text-[#C9A84C]" />
+          <span className="text-xs font-bold text-[#C9A84C]">Akun Premium</span>
+        </div>
+      )}
+
       {/* Settings link */}
       <div className="px-4 pb-4 pt-2 border-t border-[rgba(201,168,76,0.2)]">
         <Link
@@ -132,6 +156,8 @@ export function Sidebar({ userName = 'Jamaah', departureDate, prepProgress = 0 }
           </aside>
         </>
       )}
+
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
     </>
   )
 }

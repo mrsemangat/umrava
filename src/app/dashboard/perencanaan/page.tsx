@@ -6,11 +6,20 @@ import { formatRupiah } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Circle, ChevronDown, ChevronUp, Info } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { PremiumGate } from '@/components/dashboard/PremiumGate'
+import { usePlan } from '@/components/dashboard/PlanProvider'
 
 const TABS = ['Estimasi Biaya', 'Checklist Persiapan', 'Itinerary Builder']
 
 export default function PerencanaanPage() {
   const [activeTab, setActiveTab] = useState(0)
+  const { isPremium } = usePlan()
+
+  const TABS_WITH_LOCK = [
+    { label: 'Estimasi Biaya', premium: true },
+    { label: 'Checklist Persiapan', premium: false },
+    { label: 'Itinerary Builder', premium: true },
+  ]
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -21,23 +30,32 @@ export default function PerencanaanPage() {
 
       {/* Tabs */}
       <div className="flex bg-white rounded-2xl p-1 mb-6 shadow-sm border border-[rgba(201,168,76,0.12)]">
-        {TABS.map((tab, i) => (
+        {TABS_WITH_LOCK.map((tab, i) => (
           <button
             key={i}
             onClick={() => setActiveTab(i)}
             className={cn(
-              'flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all',
+              'flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5',
               activeTab === i ? 'bg-[#1B6B3A] text-white shadow-sm' : 'text-[#6b7280] hover:text-[#0D4A28]'
             )}
           >
-            {tab}
+            {tab.label}
+            {tab.premium && !isPremium && <span className="text-[10px]">🔒</span>}
           </button>
         ))}
       </div>
 
-      {activeTab === 0 && <EstimaBiayaTab />}
+      {activeTab === 0 && (
+        <PremiumGate isPremium={isPremium} featureName="Kalkulator Estimasi Biaya" description="Hitung estimasi biaya umroh mandirimu secara detail — tiket, visa, hotel, makan, hingga oleh-oleh.">
+          <EstimaBiayaTab />
+        </PremiumGate>
+      )}
       {activeTab === 1 && <ChecklistTab />}
-      {activeTab === 2 && <ItineraryTab />}
+      {activeTab === 2 && (
+        <PremiumGate isPremium={isPremium} featureName="Itinerary Builder" description="Buat jadwal perjalanan hari per hari dan export ke PDF — siap cetak untuk dibawa ke Tanah Suci.">
+          <ItineraryTab />
+        </PremiumGate>
+      )}
     </div>
   )
 }
