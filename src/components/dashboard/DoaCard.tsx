@@ -84,7 +84,7 @@ export function DoaCard({ doa, nightMode, isFavorited, onToggleFavorite }: DoaCa
       )}
 
       {/* Audio Player */}
-      <AudioPlayer compact doaJudul={`Audio: ${doa.judul}`} />
+      <AudioPlayer compact doaJudul={doa.judul} arabText={doa.arab} latinText={doa.latin} />
     </div>
   )
 }

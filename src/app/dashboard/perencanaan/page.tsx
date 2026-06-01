@@ -309,8 +309,194 @@ function ChecklistTab() {
 function ItineraryTab() {
   const [selected, setSelected] = useState<string | null>(null)
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
+  const [exporting, setExporting] = useState(false)
 
   const template = ITINERARY_TEMPLATES.find(t => t.id === selected)
+
+  const exportPDF = async () => {
+    if (!template) return
+    setExporting(true)
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+
+      const GREEN = [13, 74, 40] as [number, number, number]
+      const GOLD = [201, 168, 76] as [number, number, number]
+      const pageW = 210
+      const pageH = 297
+      const margin = 18
+      const contentW = pageW - margin * 2
+
+      let y = 0
+
+      const addPage = () => {
+        doc.addPage()
+        y = margin
+        // Header setiap halaman
+        doc.setFillColor(...GREEN)
+        doc.rect(0, 0, pageW, 12, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(8)
+        doc.text('BaitGo — Teman Setia Perjalanan Umrohmu', margin, 8)
+        doc.text(template.judul, pageW - margin, 8, { align: 'right' })
+        y = 18
+      }
+
+      const checkY = (needed: number) => {
+        if (y + needed > pageH - 20) addPage()
+      }
+
+      // ── COVER ──────────────────────────────────
+      doc.setFillColor(...GREEN)
+      doc.rect(0, 0, pageW, 70, 'F')
+
+      // Logo area
+      doc.setFillColor(...GOLD)
+      doc.roundedRect(margin, 14, 26, 26, 4, 4, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(18)
+      doc.text('BG', margin + 13, 31, { align: 'center' })
+
+      // Title
+      doc.setFontSize(22)
+      doc.setFont('helvetica', 'bold')
+      doc.text('ITINERARY UMROH', margin + 32, 26)
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(...GOLD)
+      doc.text(template.judul, margin + 32, 35)
+      doc.setTextColor(200, 220, 200)
+      doc.setFontSize(10)
+      doc.text('BaitGo — Panduan Umroh Indonesia', margin + 32, 43)
+      doc.text(`Dibuat: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, margin + 32, 50)
+
+      // Info strip
+      doc.setFillColor(...GOLD)
+      doc.rect(0, 72, pageW, 16, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`${template.durasi} Hari Perjalanan`, margin, 83)
+      doc.text(`${template.hari.length} Hari Terjadwal`, pageW / 2, 83, { align: 'center' })
+      doc.text('Powered by BaitGo', pageW - margin, 83, { align: 'right' })
+
+      // Deskripsi
+      doc.setTextColor(60, 60, 60)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text(template.deskripsi, margin, 102, { maxWidth: contentW })
+      y = 118
+
+      // Panduan singkat
+      doc.setFillColor(240, 248, 244)
+      doc.roundedRect(margin, y, contentW, 32, 3, 3, 'F')
+      doc.setTextColor(...GREEN)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Tips Perjalanan:', margin + 4, y + 8)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(60, 60, 60)
+      const tips = [
+        '• Kenakan ihram di pesawat saat melewati miqat',
+        '• Simpan dokumen penting di tas tangan (kabin)',
+        '• Download aplikasi Nusuk untuk booking Raudhah',
+        '• Bawa botol minum kosong untuk isi Zamzam',
+      ]
+      tips.forEach((tip, i) => doc.text(tip, margin + 4, y + 14 + i * 5))
+      y += 42
+
+      // ── ITINERARY PER HARI ──────────────────────
+      template.hari.forEach((h, idx) => {
+        if (idx === 0 || y > pageH - 50) { if (idx > 0) addPage(); else y += 8 }
+
+        checkY(48)
+
+        // Day header
+        doc.setFillColor(...GREEN)
+        doc.roundedRect(margin, y, contentW, 10, 2, 2, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`Hari ${h.hari}`, margin + 4, y + 7)
+
+        // Kegiatan utama di header
+        const mainActivity = h.pagi || h.siang || h.malam
+        if (mainActivity) {
+          doc.setTextColor(...GOLD)
+          doc.setFontSize(9)
+          doc.text(mainActivity.slice(0, 60) + (mainActivity.length > 60 ? '...' : ''), margin + 24, y + 7)
+        }
+        y += 13
+
+        // Kegiatan detail
+        const activities = [
+          { label: 'Pagi', value: h.pagi, color: [255, 165, 0] as [number, number, number] },
+          { label: 'Siang', value: h.siang, color: [255, 140, 0] as [number, number, number] },
+          { label: 'Malam', value: h.malam, color: [70, 70, 130] as [number, number, number] },
+        ].filter(a => a.value)
+
+        activities.forEach(act => {
+          checkY(10)
+          doc.setFillColor(248, 250, 248)
+          doc.rect(margin, y, contentW, 8, 'F')
+          doc.setTextColor(...act.color)
+          doc.setFontSize(8)
+          doc.setFont('helvetica', 'bold')
+          doc.text(act.label, margin + 3, y + 5.5)
+          doc.setTextColor(50, 50, 50)
+          doc.setFont('helvetica', 'normal')
+          const txt = act.value!.slice(0, 85) + (act.value!.length > 85 ? '...' : '')
+          doc.text(txt, margin + 18, y + 5.5)
+          y += 9
+        })
+
+        // Catatan
+        if (h.catatan) {
+          checkY(8)
+          doc.setFillColor(250, 245, 230)
+          doc.rect(margin, y, contentW, 7, 'F')
+          doc.setTextColor(139, 105, 20)
+          doc.setFontSize(7.5)
+          doc.setFont('helvetica', 'italic')
+          doc.text('Catatan: ' + h.catatan.slice(0, 90), margin + 3, y + 5)
+          y += 8
+        }
+
+        y += 4
+      })
+
+      // ── FOOTER HALAMAN TERAKHIR ──────────────────
+      checkY(30)
+      doc.setFillColor(240, 248, 244)
+      doc.roundedRect(margin, y, contentW, 28, 3, 3, 'F')
+      doc.setTextColor(...GREEN)
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Semoga Umrohmu Mabrur', pageW / 2, y + 9, { align: 'center' })
+      doc.setTextColor(100, 100, 100)
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.text('BaitGo — baitgo.vercel.app | Panduan Umroh Lengkap untuk Jamaah Indonesia', pageW / 2, y + 16, { align: 'center' })
+      doc.setTextColor(150, 150, 150)
+      doc.setFontSize(7)
+      doc.text('Disclaimer: Itinerary ini bersifat panduan. Sesuaikan dengan kondisi aktual di lapangan.', pageW / 2, y + 22, { align: 'center' })
+
+      // Nomor halaman
+      const totalPages = doc.getNumberOfPages()
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i)
+        doc.setFontSize(7)
+        doc.setTextColor(150, 150, 150)
+        doc.text(`Halaman ${i} dari ${totalPages} | BaitGo`, pageW / 2, pageH - 6, { align: 'center' })
+      }
+
+      doc.save(`Itinerary-Umroh-BaitGo-${template.durasi}Hari.pdf`)
+    } catch (err) {
+      console.error('PDF error:', err)
+      alert('Gagal generate PDF. Coba lagi.')
+    }
+    setExporting(false)
+  }
 
   return (
     <div>
@@ -333,9 +519,18 @@ function ItineraryTab() {
         </>
       ) : (
         <>
-          <div className="flex items-center gap-3 mb-5">
-            <button onClick={() => setSelected(null)} className="text-sm text-[#6b7280] hover:text-[#0D4A28]">← Pilih template lain</button>
-            <span className="text-sm font-bold text-[#0D4A28]">{template?.judul}</span>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSelected(null)} className="text-sm text-[#6b7280] hover:text-[#0D4A28]">← Pilih template lain</button>
+              <span className="text-sm font-bold text-[#0D4A28]">{template?.judul}</span>
+            </div>
+            <button
+              onClick={exportPDF}
+              disabled={exporting}
+              className="flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8963d] disabled:bg-gray-300 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
+            >
+              {exporting ? '⏳ Membuat PDF...' : '📄 Download PDF'}
+            </button>
           </div>
 
           <div className="space-y-3">

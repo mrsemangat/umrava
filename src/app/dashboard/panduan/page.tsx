@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { TAHAP_IBADAH } from '@/data/panduan'
 import { DATA_DOA } from '@/data/doa'
 import { TawafCounter } from '@/components/dashboard/TawafCounter'
@@ -168,7 +169,7 @@ export default function PanduanPage() {
                         {doa.terjemahan}
                       </p>
                     </div>
-                    <AudioPlayer compact doaJudul={doa.judul} />
+                    <AudioPlayer compact doaJudul={doa.judul} arabText={doa.arab} latinText={doa.latin} />
                   </>
                 )}
               </div>
@@ -210,11 +211,16 @@ export default function PanduanPage() {
       )}
 
       {/* Ziarah Madinah CTA */}
-      <div className="bg-white rounded-2xl p-5 border border-[rgba(201,168,76,0.12)] shadow-sm mb-8">
-        <h3 className="font-bold text-[#0D4A28] mb-1">🕌 Panduan Ziarah Madinah</h3>
-        <p className="text-sm text-[#6b7280] mb-3">Masjid Nabawi, Raudhah, Makam Nabi ﷺ, Masjid Quba, Jabal Uhud</p>
-        <div className="text-xs text-[#1B6B3A] font-semibold">Tersedia di panduan lengkap →</div>
-      </div>
+      <Link href="/dashboard/panduan/madinah" className="block bg-white rounded-2xl p-5 border border-[rgba(201,168,76,0.12)] shadow-sm mb-8 hover:shadow-md hover:border-[#1B6B3A] transition-all group">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#E8F5ED] flex items-center justify-center text-2xl flex-shrink-0 group-hover:bg-[#1B6B3A] transition-colors">🕌</div>
+          <div className="flex-1">
+            <h3 className="font-bold text-[#0D4A28] mb-0.5">Panduan Ziarah Madinah</h3>
+            <p className="text-sm text-[#6b7280]">Masjid Nabawi · Raudhah · Makam Nabi ﷺ · Masjid Quba · Jabal Uhud · Kebun Kurma</p>
+          </div>
+          <div className="text-[#1B6B3A] font-bold text-xl group-hover:translate-x-1 transition-transform">→</div>
+        </div>
+      </Link>
     </div>
   )
 }
