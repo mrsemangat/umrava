@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', icon: '🏠', label: 'Beranda' },
   { href: '/dashboard/panduan', icon: '🕌', label: 'Panduan Ibadah' },
   { href: '/dashboard/doa', icon: '🤲', label: 'Bank Doa' },
+  { href: '/dashboard/zikir', icon: '☀️', label: 'Zikir Pagi & Petang', premium: true },
   { href: '/dashboard/perencanaan', icon: '📋', label: 'Perencanaan' },
   { href: '/dashboard/spot-foto', icon: '📸', label: 'Spot Foto' },
   { href: '/dashboard/panduan-praktis', icon: '🗺️', label: 'Panduan Praktis' },
@@ -64,8 +65,11 @@ export function Sidebar({ userName = 'Jamaah', departureDate, prepProgress = 0, 
               )}
             >
               <span className="text-lg">{item.icon}</span>
-              <span>{item.label}</span>
-              {isActive && <ChevronRight size={14} className="ml-auto" />}
+              <span className="flex-1">{item.label}</span>
+              {'premium' in item && item.premium && !isPremium && (
+                <span className="text-[8px] font-bold bg-[#C9A84C]/30 text-[#C9A84C] px-1.5 py-0.5 rounded-full ml-1">PRO</span>
+              )}
+              {isActive && <ChevronRight size={14} className="ml-1" />}
             </Link>
           )
         })}
