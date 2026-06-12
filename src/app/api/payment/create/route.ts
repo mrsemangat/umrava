@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       payload: { reference: tx.reference, merchantOrderId, method },
     })
 
-    // Kirim email instruksi pembayaran (fire-and-forget)
+    // Kirim email instruksi pembayaran
     if (customerEmail) {
       const metodeLabel = METHOD_GROUPS[method.toUpperCase()] || method
       sendEmail(buildTransactionEmail({
@@ -66,11 +66,14 @@ export async function POST(req: Request) {
         va_number: tx.vaNumber,
         payment_url: tx.paymentUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/upgrade`,
         expired_time: tx.expired_time,
-      })).catch(() => {})
+      })).then(r => {
+        if (!r.ok) console.error('[Payment/Create] Email gagal:', r.error)
+      }).catch(err => console.error('[Payment/Create] Email error:', err))
     }
 
     return NextResponse.json({ success: true, transaction: tx })
   } catch (e) {
+    console.error('[Payment/Create] Transaksi gagal:', (e as Error).message)
     return NextResponse.json({ success: false, error: (e as Error).message }, { status: 500 })
   }
 }

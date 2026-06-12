@@ -66,8 +66,8 @@ export default function AdminTrackingPage() {
         <div className="text-sm text-amber-700 leading-relaxed">
           <p className="font-bold mb-1">Cara kerja:</p>
           <ul className="space-y-1 list-disc list-inside text-xs">
-            <li>ID disimpan ke database Supabase</li>
-            <li>Aktif setelah deploy ulang ke Vercel</li>
+            <li>ID disimpan ke database dan langsung aktif tanpa deploy ulang</li>
+            <li>Pixel akan muncul di semua halaman termasuk homepage &amp; landing page</li>
             <li>Kosongkan untuk menonaktifkan</li>
           </ul>
         </div>

@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
   if (!inserted) return NextResponse.json({ error: 'Gagal membuat order' }, { status: 500 })
 
-  // Kirim email instruksi transfer (fire-and-forget)
+  // Kirim email instruksi transfer
   if (customerEmail) {
     const selectedBank = settings.bankAccounts.find(
       b => b.bankName.toLowerCase() === (bankName || '').toLowerCase()
@@ -80,7 +80,11 @@ export async function POST(req: Request) {
         bank_name: selectedBank.bankName,
         account_number: selectedBank.accountNumber,
         account_name: selectedBank.accountName,
-      })).catch(() => {})
+      })).then(r => {
+        if (!r.ok) console.error('[BankTransfer] Email gagal:', r.error)
+      }).catch(err => console.error('[BankTransfer] Email error:', err))
+    } else {
+      console.warn('[BankTransfer] Tidak ada rekening bank — email instruksi tidak dikirim')
     }
   }
 

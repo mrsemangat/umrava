@@ -8,6 +8,8 @@ import { siteSettings } from '@/lib/db/schema'
 import { inArray } from 'drizzle-orm'
 import { SessionProvider } from "next-auth/react"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Umrava — Teman Setia Perjalanan Umrohmu",
   description: "Platform lengkap untuk calon jamaah umroh Indonesia. Al-Quran, panduan ibadah, kompas kiblat, bank doa, perencanaan biaya, dan spot foto terbaik di Tanah Suci.",
@@ -51,8 +53,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://fonts.googleapis.com/css2?family=Plus Jakarta+Sans:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
           rel="stylesheet"
         />
-        <GTMScript gtmId={gtmId} />
-        <MetaPixel pixelId={pixelId} />
       </head>
       <body className="min-h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         <GTMNoScript gtmId={gtmId} />
@@ -60,6 +60,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
         </SessionProvider>
         <Toaster position="top-center" richColors />
+        <GTMScript gtmId={gtmId} />
+        <MetaPixel pixelId={pixelId} />
       </body>
     </html>
   )

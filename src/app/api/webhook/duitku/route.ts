@@ -93,11 +93,9 @@ export async function POST(req: NextRequest) {
     // Fallback: cari dari prefix userId di merchantOrderId
     const prefix = extractUserIdPrefix(merchantOrderId)
     if (prefix) {
-      const profiles = await db.select({ id: users.id, email: users.email, fullName: users.fullName })
+      const allProfiles = await db.select({ id: users.id, email: users.email, fullName: users.fullName })
         .from(users)
-        .limit(1)
-      // Note: ilike not easily applied here — use a simpler startswith approach
-      const match = profiles.find(p => p.id.replace(/-/g, '').startsWith(prefix.replace(/-/g, '')))
+      const match = allProfiles.find(p => p.id.replace(/-/g, '').startsWith(prefix.replace(/-/g, '')))
       if (match) {
         userId = match.id
         userEmail = match.email
@@ -133,12 +131,13 @@ export async function POST(req: NextRequest) {
   logBase.userId = userId
   await db.insert(webhookLogs).values(logBase)
 
-  // Kirim email premium (fire-and-forget)
+  // Kirim email premium
   const emailName = profile?.fullName || userName || 'Sahabat'
   const emailAddr = profile?.email || userEmail || ''
   if (emailAddr) {
-    const emailPayload = buildPremiumEmail({ nama_user: emailName, email: emailAddr })
-    sendEmail(emailPayload).catch(() => {})
+    sendEmail(buildPremiumEmail({ nama_user: emailName, email: emailAddr }))
+      .then(r => { if (!r.ok) console.error('[Duitku] Email premium gagal:', r.error) })
+      .catch(err => console.error('[Duitku] Email premium error:', err))
   }
 
   console.log(`[Duitku] ${userEmail} upgraded to Premium — ref: ${reference}`)
