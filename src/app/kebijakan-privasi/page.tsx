@@ -104,7 +104,7 @@ export default function KebijakanPrivasiPage() {
               <ul className="space-y-1.5 pl-4">
                 <li className="flex gap-2"><span className="text-[#1B6B3A]">•</span> Enkripsi kata sandi menggunakan algoritma bcrypt</li>
                 <li className="flex gap-2"><span className="text-[#1B6B3A]">•</span> Koneksi database hanya melalui SSL</li>
-                <li className="flex gap-2"><span className="text-[#1B6B3A]">•</span> Autentikasi menggunakan Supabase Auth dengan standar keamanan tinggi</li>
+                <li className="flex gap-2"><span className="text-[#1B6B3A]">•</span> Autentikasi menggunakan NextAuth.js dengan standar keamanan tinggi</li>
                 <li className="flex gap-2"><span className="text-[#1B6B3A]">•</span> Akses admin terbatas dan termonitor</li>
               </ul>
               <p>Data Anda akan disimpan selama akun Anda aktif. Jika akun dihapus, data Anda akan dihapus dalam 30 hari kerja.</p>
@@ -125,8 +125,8 @@ export default function KebijakanPrivasiPage() {
                   <p className="text-xs text-gray-500">Memproses transaksi pembayaran. Data yang dibagikan: email, nama, jumlah transaksi. Duitku memiliki kebijakan privasi tersendiri.</p>
                 </div>
                 <div className="border border-gray-100 rounded-xl p-4">
-                  <p className="font-semibold text-[#0D4A28] text-xs mb-2">🗄️ Supabase (Database & Auth)</p>
-                  <p className="text-xs text-gray-500">Penyimpanan data dan autentikasi pengguna. Supabase tunduk pada regulasi perlindungan data internasional (GDPR compliant).</p>
+                  <p className="font-semibold text-[#0D4A28] text-xs mb-2">🗄️ Neon (Database)</p>
+                  <p className="text-xs text-gray-500">Penyimpanan data pengguna menggunakan PostgreSQL terkelola. Neon tunduk pada regulasi perlindungan data internasional (GDPR compliant).</p>
                 </div>
                 <div className="border border-gray-100 rounded-xl p-4">
                   <p className="font-semibold text-[#0D4A28] text-xs mb-2">☁️ Vercel (Hosting)</p>

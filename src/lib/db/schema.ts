@@ -2,7 +2,7 @@ import {
   pgTable, text, timestamp, boolean, integer, date, jsonb,
   primaryKey, unique,
 } from 'drizzle-orm/pg-core'
-// ─── Users (gabungan profiles + Supabase auth.users) ─────────────────────────
+// ─── Users ───────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text('name'),

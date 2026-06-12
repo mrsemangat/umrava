@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { getDaysUntil } from '@/lib/utils'
 import { UpgradeBanner } from '@/components/dashboard/UpgradeBanner'
+import { Suspense } from 'react'
+import { PixelNewUser } from '@/components/analytics/PixelNewUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +22,8 @@ const TIPS_HARIAN = [
   "Belajar bahasa Arab dasar — minimal angka dan kalimat kebutuhan sehari-hari.",
 ]
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
+  const params = await searchParams
   const session = await auth()
   if (!session?.user) redirect('/auth/login')
 
@@ -46,6 +49,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {params.welcome === '1' && (
+        <Suspense fallback={null}>
+          <PixelNewUser />
+        </Suspense>
+      )}
       {/* Upgrade Banner — hanya untuk free user */}
       {!isPremium && <UpgradeBanner />}
 

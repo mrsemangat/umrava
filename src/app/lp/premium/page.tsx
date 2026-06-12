@@ -286,7 +286,7 @@ export default function LPPremiumPage() {
         setStep('success')
         clearInterval(intervalRef.current!)
         if (typeof window !== 'undefined' && window.fbq) {
-          window.fbq('track', 'Purchase', { value: AMOUNT / 1000, currency: 'IDR', content_name: 'Umrava Premium' })
+          window.fbq('track', 'Purchase', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
         }
       }
     } catch { /* ignore */ }
@@ -327,7 +327,7 @@ export default function LPPremiumPage() {
       if (result?.error) { toast.error('Email atau password salah'); return }
 
       if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', 'InitiateCheckout', { value: 49, currency: 'IDR', content_name: 'Umrava Premium' })
+        window.fbq('track', 'InitiateCheckout', { value: 49000, currency: 'IDR', content_name: 'Umrava Premium' })
       }
       setStep('payment'); loadChannels()
     } finally { setAuthLoading(false) }

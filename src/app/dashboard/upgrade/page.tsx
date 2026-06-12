@@ -220,7 +220,7 @@ export default function UpgradePage() {
         setAutoCheck(false)
         toast.success('Pembayaran berhasil! Akun Premium Anda telah aktif 🎉')
         if (typeof window !== 'undefined' && window.fbq) {
-          window.fbq('track', 'Purchase', { value: AMOUNT / 1000, currency: 'IDR', content_name: 'Umrava Premium' })
+          window.fbq('track', 'Purchase', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
         }
       } else if (data.statusCode === '02') {
         toast.error('Transaksi kadaluarsa atau gagal. Silakan buat transaksi baru.')
@@ -254,7 +254,7 @@ export default function UpgradePage() {
     if (!selectedMethod) { toast.error('Pilih metode pembayaran'); return }
     setCreating(true)
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'InitiateCheckout', { value: AMOUNT / 1000, currency: 'IDR', content_name: 'Umrava Premium' })
+      window.fbq('track', 'InitiateCheckout', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
     }
     try {
       const res = await fetch('/api/payment/create', {
@@ -278,7 +278,7 @@ export default function UpgradePage() {
     if (!selectedBankAccount) { toast.error('Pilih rekening tujuan transfer'); return }
     setTransferSubmitting(true)
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'InitiateCheckout', { value: AMOUNT / 1000, currency: 'IDR', content_name: 'Umrava Premium' })
+      window.fbq('track', 'InitiateCheckout', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
     }
     try {
       const res = await fetch('/api/payment/bank-transfer', {

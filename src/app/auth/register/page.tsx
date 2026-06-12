@@ -49,7 +49,7 @@ export default function RegisterPage() {
     if (typeof window !== 'undefined' && (window as Window & { fbq?: Function }).fbq) {
       (window as Window & { fbq?: Function }).fbq?.('track', 'InitiateCheckout', {
         content_name: 'Umrava Premium',
-        value: 49,
+        value: 49000,
         currency: 'IDR',
       })
     }
