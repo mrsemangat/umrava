@@ -9,7 +9,7 @@ import { buildWelcomeEmail } from '@/lib/emailTemplates'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
-  const { name, email, password } = await req.json().catch(() => ({}))
+  const { name, email, password, phone } = await req.json().catch(() => ({}))
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email dan password diperlukan' }, { status: 400 })
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     password: hashed,
     name: nama,
     fullName: nama,
+    phone: phone || null,
     plan: 'free',
     isAdmin: false,
   })

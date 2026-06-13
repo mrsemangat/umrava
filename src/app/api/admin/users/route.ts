@@ -19,6 +19,7 @@ type UserCols = {
   id: string
   fullName: string | null
   email: string
+  phone: string | null
   plan: string | null
   city: string | null
   departureDate: string | null
@@ -32,6 +33,7 @@ function toRow(u: UserCols) {
     id: u.id,
     full_name: u.fullName,
     email: u.email,
+    phone: u.phone,
     plan: u.plan,
     city: u.city,
     departure_date: u.departureDate,
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
   const offset = (page - 1) * limit
 
   const cols = {
-    id: users.id, fullName: users.fullName, email: users.email, plan: users.plan,
+    id: users.id, fullName: users.fullName, email: users.email, phone: users.phone, plan: users.plan,
     city: users.city, departureDate: users.departureDate, createdAt: users.createdAt,
     premiumActivatedAt: users.premiumActivatedAt, isAdmin: users.isAdmin,
   }

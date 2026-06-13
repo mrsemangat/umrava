@@ -232,7 +232,7 @@ export default function LPPremiumPage() {
   const router = useRouter()
   const { data: sessionData } = useSession()
   const [step, setStep] = useState<Step>('landing')
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' })
   const [authLoading, setAuthLoading] = useState(false)
   const [channels, setChannels] = useState<PaymentChannel[]>([])
   const [channelsLoading, setChannelsLoading] = useState(false)
@@ -338,7 +338,7 @@ export default function LPPremiumPage() {
       // Coba register via API route
       const regRes = await fetch('/api/auth/register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, phone: form.phone }),
       })
       const regData = await regRes.json()
 
@@ -671,6 +671,20 @@ export default function LPPremiumPage() {
               <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required
                 placeholder="email@contoh.com"
                 className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1B6B3A] transition-colors" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                No. WhatsApp <span className="text-[#C9A84C] font-bold">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium select-none">+62</span>
+                <input
+                  type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '') }))}
+                  required placeholder="8123456789"
+                  className="w-full border-2 border-gray-100 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#1B6B3A] transition-colors"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Untuk konfirmasi pembayaran via WhatsApp</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>

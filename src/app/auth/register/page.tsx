@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 export const dynamic = 'force-dynamic'
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -21,7 +21,7 @@ export default function RegisterPage() {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ name: form.name, email: form.email, password: form.password, phone: form.phone }),
     })
     const data = await res.json()
 
@@ -136,6 +136,19 @@ export default function RegisterPage() {
                   placeholder="email@contoh.com"
                   className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1B6B3A] transition-colors"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#374151] mb-1.5">
+                  No. WhatsApp <span className="text-gray-400 font-normal">(opsional)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium select-none">+62</span>
+                  <input
+                    type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '') }))}
+                    placeholder="8123456789"
+                    className="w-full border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#1B6B3A] transition-colors"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1.5">Password</label>

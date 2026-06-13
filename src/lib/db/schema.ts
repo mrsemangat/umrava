@@ -11,6 +11,7 @@ export const users = pgTable('users', {
   image: text('image'),
   password: text('password'),          // bcrypt hash, null untuk OAuth user
   fullName: text('full_name'),
+  phone: text('phone'),
   city: text('city'),
   departureDate: date('departure_date'),
   plan: text('plan').default('free'),  // free | premium

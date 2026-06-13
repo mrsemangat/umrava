@@ -12,6 +12,7 @@ interface UserRow {
   id: string
   full_name: string | null
   email: string | null
+  phone: string | null
   plan: 'free' | 'premium'
   city: string | null
   departure_date: string | null
@@ -314,6 +315,7 @@ export default function AdminUsersPage() {
               <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
                 {[
                   { label: 'Plan', val: selectedUser.plan === 'premium' ? '✨ Premium' : 'Free' },
+                  { label: 'WhatsApp', val: selectedUser.phone ? `+62${selectedUser.phone}` : '—' },
                   { label: 'Kota', val: selectedUser.city ?? 'Belum diset' },
                   { label: 'Keberangkatan', val: selectedUser.departure_date ? new Date(selectedUser.departure_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Belum diset' },
                   { label: 'Bergabung', val: new Date(selectedUser.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) },
@@ -456,6 +458,18 @@ export default function AdminUsersPage() {
                 Salin pesan lalu kirim ke nomor WA user, atau buka WA Web dan pilih kontaknya.
               </p>
 
+              {waUser.phone && (
+                <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm">
+                  <span className="text-green-700 font-medium">📱 +62{waUser.phone}</span>
+                  <span className="text-green-500 text-xs">Nomor terdaftar</span>
+                </div>
+              )}
+              {!waUser.phone && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2.5 mb-4 text-xs text-yellow-700">
+                  ⚠️ User belum mengisi nomor WhatsApp — salin pesan dan kirim manual.
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <button
                   onClick={() => copyWa(buildWaMessage(waUser))}
@@ -467,11 +481,14 @@ export default function AdminUsersPage() {
                   {copied ? <><Check size={15} /> Tersalin!</> : <><Copy size={15} /> Salin Pesan</>}
                 </button>
                 <a
-                  href={`https://web.whatsapp.com/send?text=${encodeURIComponent(buildWaMessage(waUser))}`}
+                  href={waUser.phone
+                    ? `https://wa.me/62${waUser.phone}?text=${encodeURIComponent(buildWaMessage(waUser))}`
+                    : `https://web.whatsapp.com/send?text=${encodeURIComponent(buildWaMessage(waUser))}`
+                  }
                   target="_blank" rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm transition-colors"
                 >
-                  <ExternalLink size={15} /> Buka WA Web
+                  <ExternalLink size={15} /> {waUser.phone ? 'Kirim WA' : 'Buka WA Web'}
                 </a>
               </div>
             </div>
