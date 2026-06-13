@@ -104,6 +104,7 @@ const BANK_CONFIG: Record<string, { bg: string; text: string; abbr: string }> = 
 }
 
 const AMOUNT = 49000
+const LP_TX_KEY = 'umrava_pending_tx'
 type Step = 'landing' | 'register' | 'payment' | 'instructions' | 'success'
 
 function formatRp(n: number) { return `Rp${n.toLocaleString('id-ID')}` }
@@ -242,10 +243,32 @@ export default function LPPremiumPage() {
   const [checking, setChecking] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
+  // Ref to signal "pending VA exists" — set by restore effect before sessionData resolves
+  const hasPendingTxRef = useRef(false)
+
+  // Restore pending transaction from sessionStorage (client-only — runs before sessionData resolves)
+  useEffect(() => {
+    const raw = sessionStorage.getItem(LP_TX_KEY)
+    if (!raw) return
+    try {
+      const { transaction: tx } = JSON.parse(raw) as { transaction: PaymentTransaction }
+      if (tx?.expired_time * 1000 > Date.now()) {
+        hasPendingTxRef.current = true
+        setTransaction(tx)
+        setStep('instructions')
+      } else {
+        sessionStorage.removeItem(LP_TX_KEY)
+      }
+    } catch {
+      sessionStorage.removeItem(LP_TX_KEY)
+    }
+  }, [])
 
   useEffect(() => {
     if (!sessionData) return
     if (sessionData.user) {
+      // Don't override instructions step — user has a pending VA in sessionStorage
+      if (hasPendingTxRef.current) return
       // Check plan via API
       fetch('/api/user/profile').then(r => r.json()).then(({ profile }) => {
         if (profile?.plan === 'premium') { router.push('/dashboard'); return }
@@ -283,11 +306,14 @@ export default function LPPremiumPage() {
       const res = await fetch(`/api/payment/status?orderId=${transaction.merchantOrderId}`)
       const d = await res.json()
       if (d.statusCode === '00') {
+        sessionStorage.removeItem(LP_TX_KEY)
         setStep('success')
         clearInterval(intervalRef.current!)
         if (typeof window !== 'undefined' && window.fbq) {
           window.fbq('track', 'Purchase', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
         }
+      } else if (d.statusCode === '02') {
+        sessionStorage.removeItem(LP_TX_KEY)
       }
     } catch { /* ignore */ }
     finally { setChecking(false) }
@@ -340,6 +366,9 @@ export default function LPPremiumPage() {
   const handleCreateTransaction = async () => {
     if (!selectedMethod) { toast.error('Pilih metode pembayaran terlebih dahulu'); return }
     setCreating(true)
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'AddPaymentInfo', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium', payment_type: selectedMethod })
+    }
     try {
       const res = await fetch('/api/payment/create', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -347,6 +376,7 @@ export default function LPPremiumPage() {
       })
       const d = await res.json()
       if (!d.success) throw new Error(d.error)
+      sessionStorage.setItem(LP_TX_KEY, JSON.stringify({ transaction: d.transaction }))
       setTransaction(d.transaction)
       setStep('instructions')
     } catch (e) {
@@ -801,6 +831,13 @@ export default function LPPremiumPage() {
           {checking ? <><Loader2 size={16} className="animate-spin" /> Mengecek...</> : <><RefreshCw size={16} /> Saya Sudah Bayar — Cek Status</>}
         </button>
         <p className="text-xs text-center text-gray-400">Status diperbarui otomatis setiap 30 detik</p>
+        <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-600 text-center">
+          📧 Instruksi pembayaran juga dikirim ke email Anda. Cek folder <strong>Spam/Promosi</strong> jika tidak ada di inbox.
+        </div>
+        <button onClick={() => router.push('/dashboard')}
+          className="w-full py-3 text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          Bayar Nanti — Masuk ke Dashboard
+        </button>
       </div>
     </div>
   )

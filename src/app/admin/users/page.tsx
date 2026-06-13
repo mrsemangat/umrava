@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Search, Crown, ChevronLeft, ChevronRight, RefreshCw,
-  UserCog, X, MessageCircle, KeyRound, Copy, Check, ExternalLink,
+  UserCog, X, MessageCircle, KeyRound, Copy, Check, ExternalLink, Trash2,
 } from 'lucide-react'
 import { formatRupiah } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -65,6 +65,8 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null)
   const [updating, setUpdating] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [waUser, setWaUser] = useState<UserRow | null>(null)
   const [copied, setCopied] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
@@ -97,9 +99,24 @@ export default function AdminUsersPage() {
     else {
       toast.success('User berhasil diupdate')
       fetchUsers()
-      if (selectedUser?.id === userId) setSelectedUser(data.user)
+      if (selectedUser?.id === userId && data.user) setSelectedUser(data.user)
     }
     setUpdating(false)
+  }
+
+  const deleteUser = async (userId: string) => {
+    setDeleting(true)
+    const res = await fetch(`/api/admin/users?userId=${userId}`, { method: 'DELETE' })
+    const data = await res.json()
+    if (data.error) {
+      toast.error(data.error)
+    } else {
+      toast.success('User berhasil dihapus')
+      setSelectedUser(null)
+      setConfirmDelete(false)
+      fetchUsers()
+    }
+    setDeleting(false)
   }
 
   const resetPassword = async (userId: string) => {
@@ -279,7 +296,7 @@ export default function AdminUsersPage() {
           <div className="w-full max-w-sm bg-white h-full overflow-y-auto shadow-2xl">
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-bold text-gray-900">Detail User</h2>
-              <button onClick={() => { setSelectedUser(null); setConfirmReset(false) }} className="text-gray-400 hover:text-gray-700">
+              <button onClick={() => { setSelectedUser(null); setConfirmReset(false); setConfirmDelete(false) }} className="text-gray-400 hover:text-gray-700">
                 <X size={20} />
               </button>
             </div>
@@ -369,6 +386,44 @@ export default function AdminUsersPage() {
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700">
                 ⚠️ Pastikan tindakan ini sudah benar. Perubahan langsung berlaku.
               </div>
+
+              {/* Danger Zone: Hapus User */}
+              {!selectedUser.is_admin && (
+                <div className="border border-red-200 rounded-xl overflow-hidden">
+                  <div className="bg-red-50 px-4 py-2.5 flex items-center gap-2">
+                    <Trash2 size={13} className="text-red-500" />
+                    <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Danger Zone</span>
+                  </div>
+                  {!confirmDelete ? (
+                    <div className="p-4">
+                      <p className="text-xs text-gray-500 mb-3">Hapus permanen akun dan seluruh data user ini.</p>
+                      <button
+                        onClick={() => setConfirmDelete(true)}
+                        className="w-full py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Trash2 size={14} /> Hapus User
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-red-50">
+                      <p className="text-sm font-bold text-red-700 mb-1">Yakin hapus user ini?</p>
+                      <p className="text-xs text-red-600 mb-3">
+                        Semua data akan dihapus permanen — ibadah, checklist, itinerary, catatan, pembayaran. <strong>Tidak bisa dibatalkan.</strong>
+                      </p>
+                      <div className="flex gap-2">
+                        <button onClick={() => setConfirmDelete(false)}
+                          className="flex-1 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-white">
+                          Batal
+                        </button>
+                        <button onClick={() => deleteUser(selectedUser.id)} disabled={deleting}
+                          className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-1.5">
+                          {deleting ? 'Menghapus...' : <><Trash2 size={13} /> Ya, Hapus</>}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

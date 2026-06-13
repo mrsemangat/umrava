@@ -192,6 +192,13 @@ export default function UpgradePage() {
     }
   }, [])
 
+  // InitiateCheckout pixel — user membuka halaman upgrade (belum ada pending tx)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.fbq && !sessionStorage.getItem(TX_KEY)) {
+      window.fbq('track', 'InitiateCheckout', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
+    }
+  }, [])
+
   // Load payment method settings first, then conditionally load channels
   useEffect(() => {
     fetch('/api/payment/methods')
@@ -276,7 +283,7 @@ export default function UpgradePage() {
     if (!selectedMethod) { toast.error('Pilih metode pembayaran'); return }
     setCreating(true)
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'InitiateCheckout', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
+      window.fbq('track', 'AddPaymentInfo', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium', payment_type: selectedMethod })
     }
     try {
       const res = await fetch('/api/payment/create', {
@@ -301,7 +308,7 @@ export default function UpgradePage() {
     if (!selectedBankAccount) { toast.error('Pilih rekening tujuan transfer'); return }
     setTransferSubmitting(true)
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'InitiateCheckout', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium' })
+      window.fbq('track', 'AddPaymentInfo', { value: AMOUNT, currency: 'IDR', content_name: 'Umrava Premium', payment_type: 'bank_transfer' })
     }
     try {
       const res = await fetch('/api/payment/bank-transfer', {
@@ -776,6 +783,10 @@ export default function UpgradePage() {
             {autoCheck && '🔄 Cek otomatis setiap 30 detik · '}
             Status diperbarui otomatis setelah pembayaran masuk.
           </p>
+
+          <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-600 text-center">
+            📧 Instruksi juga dikirim ke email Anda. Cek <strong>Spam/Promosi</strong> jika tidak di inbox.
+          </div>
 
           <button
             onClick={() => router.push('/dashboard')}
