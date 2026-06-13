@@ -9,6 +9,7 @@ import { signOut } from 'next-auth/react'
 const NAV = [
   { href: '/admin', icon: '📊', label: 'Overview' },
   { href: '/admin/users', icon: '👥', label: 'Manajemen User' },
+  { href: '/admin/transactions', icon: '💳', label: 'Histori Transaksi' },
   { href: '/admin/paket', icon: '👑', label: 'Manajemen Paket' },
   { href: '/admin/email', icon: '📧', label: 'Pengaturan Email' },
   { href: '/admin/webhooks', icon: '🔗', label: 'Webhook ScaleV' },
